@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Diet & Workout Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4f0f9 100%);
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.5s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    
+    .nutrient-bar {
+      transition: width 1s ease-in-out;
+    }
+    
+    .meal-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-gray-800">
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-green-500 to-teal-500 text-white py-6 shadow-lg">
+    <div class="container mx-auto px-4 text-center">
+      <h1 class="text-4xl font-bold mb-2">Smart Health Planner</h1>
+      <p class="text-lg opacity-90">Your personalized diet & fitness companion</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left Column - User Profile -->
+      <div class="space-y-6">
+        <!-- User Profile Card -->
+        <div class="glass-card p-6">
+          <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+            <i class="fas fa-user-circle mr-2"></i> User Profile
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input type="text" id="name" placeholder="Your name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                <input type="number" id="age" placeholder="Age" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                <select id="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                  <option value="">Select</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
+                <input type="number" id="height" placeholder="Height" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" oninput="calculateHealthStats()">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                <input type="number" id="weight" placeholder="Weight" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" oninput="calculateHealthStats()">
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Activity Level</label>
+              <select id="activity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                <option value="1.2">Sedentary (little or no exercise)</option>
+                <option value="1.375">Lightly active (light exercise 1-3 days/week)</option>
+                <option value="1.55" selected>Moderately active (moderate exercise 3-5 days/week)</option>
+                <option value="1.725">Very active (hard exercise 6-7 days/week)</option>
+                <option value="1.9">Extra active (very hard exercise & physical job)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Goal</label>
+              <select id="goal" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                <option value="Lose Weight">Lose Weight</option>
+                <option value="Maintain">Maintain Weight</option>
+                <option value="Gain Muscle">Gain Muscle</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Diet Preference</label>
+              <select id="preference" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                <option value="Balanced">Balanced</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Vegan">Vegan</option>
+                <option value="Keto">Keto</option>
+                <option value="Mediterranean">Mediterranean</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Health Stats Card -->
+        <div class="glass-card p-6">
+          <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+            <i class="fas fa-heartbeat mr-2"></i> Health Stats
+          </h2>
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="text-center">
+              <div class="relative w-24 h-24 mx-auto mb-2">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                  <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                  <circle class="text-teal-500" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="calc(251.2 - (251.2 * var(--bmi-percent))/100" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span id="bmi" class="text-2xl font-bold">--</span>
+                </div>
+              </div>
+              <p class="text-sm font-medium">BMI</p>
+              <p id="bmi-category" class="text-xs text-gray-500">--</p>
+            </div>
+            
+            <div class="text-center">
+              <div class="relative w-24 h-24 mx-auto mb-2">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                  <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                  <circle class="text-blue-500" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="calc(251.2 - (251.2 * var(--water-percent))/100" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span id="water" class="text-2xl font-bold">0%</span>
+                </div>
+              </div>
+              <p class="text-sm font-medium">Water Intake</p>
+              <div class="flex justify-center space-x-1 mt-1">
+                <button onclick="updateWater(-1)" class="text-blue-500 hover:text-blue-700">
+                  <i class="fas fa-minus-circle"></i>
+                </button>
+                <button onclick="updateWater(1)" class="text-blue-500 hover:text-blue-700">
+                  <i class="fas fa-plus-circle"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Daily Calories</span>
+                <span id="calories" class="text-sm font-bold">--</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="calories-bar" class="bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Protein</span>
+                <span id="protein" class="text-sm font-bold">-- g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="protein-bar" class="bg-blue-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Carbs</span>
+                <span id="carbs" class="text-sm font-bold">-- g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="carbs-bar" class="bg-yellow-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium">Fats</span>
+                <span id="fats" class="text-sm font-bold">-- g</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="fats-bar" class="bg-red-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Middle Column - Meal Plan -->
+      <div class="space-y-6">
+        <div class="glass-card p-6">
+          <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+            <i class="fas fa-utensils mr-2"></i> Meal Plan
+          </h2>
+          
+          <div class="space-y-4">
+            <!-- Breakfast -->
+            <div class="meal-card bg-white rounded-lg p-4 shadow-md transition-all duration-300">
+              <h3 class="font-medium text-lg text-gray-800 mb-2 flex items-center">
+                <i class="fas fa-sun mr-2 text-yellow-500"></i> Breakfast
+              </h3>
+              <textarea id="breakfast" placeholder="What's for breakfast?" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 min-h-[100px]"></textarea>
+              <div class="mt-2 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                  <span id="breakfast-calories">0</span> kcal
+                </div>
+                <button onclick="suggestMeal('breakfast')" class="text-sm bg-teal-100 text-teal-700 px-3 py-1 rounded-lg hover:bg-teal-200">
+                  <i class="fas fa-lightbulb mr-1"></i> Suggest
+                </button>
+              </div>
+            </div>
+            
+            <!-- Lunch -->
+            <div class="meal-card bg-white rounded-lg p-4 shadow-md transition-all duration-300">
+              <h3 class="font-medium text-lg text-gray-800 mb-2 flex items-center">
+                <i class="fas fa-sun mr-2 text-orange-500"></i> Lunch
+              </h3>
+              <textarea id="lunch" placeholder="What's for lunch?" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 min-h-[100px]"></textarea>
+              <div class="mt-2 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                  <span id="lunch-calories">0</span> kcal
+                </div>
+                <button onclick="suggestMeal('lunch')" class="text-sm bg-teal-100 text-teal-700 px-3 py-1 rounded-lg hover:bg-teal-200">
+                  <i class="fas fa-lightbulb mr-1"></i> Suggest
+                </button>
+              </div>
+            </div>
+            
+            <!-- Dinner -->
+            <div class="meal-card bg-white rounded-lg p-4 shadow-md transition-all duration-300">
+              <h3 class="font-medium text-lg text-gray-800 mb-2 flex items-center">
+                <i class="fas fa-moon mr-2 text-indigo-500"></i> Dinner
+              </h3>
+              <textarea id="dinner" placeholder="What's for dinner?" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 min-h-[100px]"></textarea>
+              <div class="mt-2 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                  <span id="dinner-calories">0</span> kcal
+                </div>
+                <button onclick="suggestMeal('dinner')" class="text-sm bg-teal-100 text-teal-700 px-3 py-1 rounded-lg hover:bg-teal-200">
+                  <i class="fas fa-lightbulb mr-1"></i> Suggest
+                </button>
+              </div>
+            </div>
+            
+            <!-- Snacks -->
+            <div class="meal-card bg-white rounded-lg p-4 shadow-md transition-all duration-300">
+              <h3 class="font-medium text-lg text-gray-800 mb-2 flex items-center">
+                <i class="fas fa-apple-alt mr-2 text-green-500"></i> Snacks
+              </h3>
+              <textarea id="snacks" placeholder="Any snacks?" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 min-h-[80px]"></textarea>
+              <div class="mt-2 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                  <span id="snacks-calories">0</span> kcal
+                </div>
+                <button onclick="suggestMeal('snacks')" class="text-sm bg-teal-100 text-teal-700 px-3 py-1 rounded-lg hover:bg-teal-200">
+                  <i class="fas fa-lightbulb mr-1"></i> Suggest
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Nutrition Summary -->
+        <div class="glass-card p-6">
+          <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+            <i class="fas fa-chart-pie mr-2"></i> Nutrition Summary
+          </h2>
+          <div class="h-64">
+            <canvas id="nutritionChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Column - Workout & Actions -->
+      <div class="space-y-6">
+        <!-- Workout Plan -->
+        <div class="glass-card p-6">
+          <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+            <i class="fas fa-dumbbell mr-2"></i> Workout Plan
+          </h2>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Today's Focus</label>
+            <select id="workout-focus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+              <option value="Full Body">Full Body</option>
+              <option value="Upper Body">Upper Body</option>
+              <option value="Lower Body">Lower Body</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Rest Day">Rest Day</option>
+            </select>
+          </div>
+          
+          <textarea id="workout" placeholder="Today's workout routine..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 min-h-[200px]"></textarea>
+          
+          <div class="mt-4">
+            <button onclick="suggestWorkout()" class="w-full bg-teal-100 text-teal-700 py-2 rounded-lg hover:bg-teal-200 flex items-center justify-center">
+              <i class="fas fa-lightbulb mr-2"></i> Suggest Workout
+            </button>
+          </div>
+        </div>
+        
+        <!-- Progress Tracker -->
+        <div class="glass-card p-6">
+          <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+            <i class="fas fa-chart-line mr-2"></i> Progress Tracker
+          </h2>
+          
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Current Weight (kg)</label>
+              <input type="number" id="current-weight" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Target Weight (kg)</label>
+              <input type="number" id="target-weight" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+            </div>
+          </div>
+          
+          <button onclick="logProgress()" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 mb-4">
+            Log Progress
+          </button>
+          
+          <div class="h-48">
+            <canvas id="progressChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="glass-card p-6">
+          <h2 class="text-2xl font-semibold text-teal-600 mb-4 flex items-center">
+            <i class="fas fa-cog mr-2"></i> Actions
+          </h2>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <button onclick="saveData()" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+              <i class="fas fa-save mr-2"></i> Save
+            </button>
+            <button onclick="loadData()" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+              <i class="fas fa-folder-open mr-2"></i> Load
+            </button>
+            <button onclick="resetData()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+              <i class="fas fa-trash-alt mr-2"></i> Reset
+            </button>
+            <button onclick="downloadPDF()" class="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+              <i class="fas fa-file-pdf mr-2"></i> Export PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gradient-to-r from-green-500 to-teal-500 text-white py-6 mt-12">
+    <div class="container mx-auto px-4 text-center">
+      <p class="mb-2">Smart Health Planner - Your Personal Fitness Companion</p>
+      <div class="flex justify-center space-x-4">
+        <a href="#" class="hover:text-teal-200"><i class="fab fa-github"></i></a>
+        <a href="#" class="hover:text-teal-200"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="hover:text-teal-200"><i class="fab fa-instagram"></i></a>
+      </div>
+      <p class="mt-4 text-sm opacity-80">&copy; 2023 Smart Health Planner. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // DOM Elements
+    const nutritionChartCtx = document.getElementById('nutritionChart').getContext('2d');
+    const progressChartCtx = document.getElementById('progressChart').getContext('2d');
+    
+    // Global Variables
+    let nutritionChart, progressChart;
+    let progressData = [];
+    
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      loadData();
+      initCharts();
+      
+      // Set up event listeners for all inputs
+      document.querySelectorAll('input, select, textarea').forEach(element => {
+        element.addEventListener('change', saveData);
+        element.addEventListener('input', saveData);
+      });
+    });
+    
+    // Initialize Charts
+    function initCharts() {
+      // Nutrition Chart
+      nutritionChart = new Chart(nutritionChartCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Protein', 'Carbs', 'Fats'],
+          datasets: [{
+            data: [0, 0, 0],
+            backgroundColor: [
+              '#3b82f6', // blue-500
+              '#f59e0b', // yellow-500
+              '#ef4444'  // red-500
+            ],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+      
+      // Progress Chart
+      progressChart = new Chart(progressChartCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Weight (kg)',
+            data: [],
+            borderColor: '#10b981', // teal-500
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    }
+    
+    // Calculate Health Stats
+    function calculateHealthStats() {
+      const height = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const age = parseInt(document.getElementById('age').value);
+      const gender = document.getElementById('gender').value;
+      const activity = parseFloat(document.getElementById('activity').value);
+      const goal = document.getElementById('goal').value;
+      
+      if (!height || !weight || !age || !gender) return;
+      
+      // Calculate BMI
+      const heightM = height / 100;
+      const bmi = (weight / (heightM * heightM)).toFixed(1);
+      document.getElementById('bmi').textContent = bmi;
+      
+      // Set BMI category
+      let bmiCategory = '';
+      if (bmi < 18.5) bmiCategory = 'Underweight';
+      else if (bmi < 24.9) bmiCategory = 'Normal';
+      else if (bmi < 29.9) bmiCategory = 'Overweight';
+      else bmiCategory = 'Obese';
+      document.getElementById('bmi-category').textContent = bmiCategory;
+      
+      // Update BMI ring
+      document.documentElement.style.setProperty('--bmi-percent', Math.min((bmi / 40) * 100, 100));
+      
+      // Calculate BMR (Harris-Benedict Equation)
+      let bmr;
+      if (gender === 'Male') {
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+      } else {
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+      }
+      
+      // Calculate TDEE (Total Daily Energy Expenditure)
+      let tdee = bmr * activity;
+      
+      // Adjust for goal
+      if (goal === 'Lose Weight') tdee *= 0.85;  // 15% deficit
+      else if (goal === 'Gain Muscle') tdee *= 1.15;  // 15% surplus
+      
+      // Set calories
+      const calories = Math.round(tdee);
+      document.getElementById('calories').textContent = calories;
+      
+      // Calculate macros (40/30/30 split for balanced diet)
+      const proteinGrams = Math.round((calories * 0.3) / 4);  // 30% of calories, 4 cal/g
+      const carbsGrams = Math.round((calories * 0.4) / 4);    // 40% of calories, 4 cal/g
+      const fatsGrams = Math.round((calories * 0.3) / 9);     // 30% of calories, 9 cal/g
+      
+      document.getElementById('protein').textContent = proteinGrams + ' g';
+      document.getElementById('carbs').textContent = carbsGrams + ' g';
+      document.getElementById('fats').textContent = fatsGrams + ' g';
+      
+      // Update nutrition chart
+      nutritionChart.data.datasets[0].data = [proteinGrams, carbsGrams, fatsGrams];
+      nutritionChart.update();
+      
+      // Update progress bars
+      document.getElementById('calories-bar').style.width = '100%';
+      document.getElementById('protein-bar').style.width = '100%';
+      document.getElementById('carbs-bar').style.width = '100%';
+      document.getElementById('fats-bar').style.width = '100%';
+      
+      // Suggest plan if fields are empty
+      if (!document.getElementById('breakfast').value && 
+          !document.getElementById('lunch').value && 
+          !document.getElementById('dinner').value) {
+        suggestPlan();
+      }
+    }
+    
+    // Update Water Intake
+    function updateWater(change) {
+      const waterElement = document.getElementById('water');
+      let current = parseInt(waterElement.textContent) || 0;
+      current = Math.min(Math.max(current + (change * 10), 100));
+      waterElement.textContent = current + '%';
+      document.documentElement.style.setProperty('--water-percent', current);
+      saveData();
+    }
+    
+    // Suggest Meal Plan
+    function suggestPlan() {
+      const goal = document.getElementById('goal').value;
+      const preference = document.getElementById('preference').value;
+      
+      let meals = { breakfast: "", lunch: "", dinner: "", snacks: "" };
+      let workout = "";
+      
+      // Meal suggestions based on goal and preference
+      if (goal === "Lose Weight") {
+        workout = "Cardio Focus:\n- 30 min brisk walking/jogging\n- 15 min HIIT (20s on/40s off)\n- Bodyweight exercises (3 rounds):\n  • 15 squats\n  • 10 push-ups\n  • 20 lunges\n  • 30s plank";
+        
+        if (preference === "Vegetarian" || preference === "Vegan") {
+          meals = {
+            breakfast: "Oatmeal with chia seeds, almond butter, and berries",
+            lunch: "Large salad with mixed greens, chickpeas, avocado, and tahini dressing",
+            dinner: "Stir-fried tofu with broccoli, bell peppers, and quinoa",
+            snacks: "Handful of almonds and an apple"
+          };
+        } else {
+          meals = {
+            breakfast: "Scrambled eggs with spinach and whole grain toast",
+            lunch: "Grilled chicken with roasted vegetables and sweet potato",
+            dinner: "Baked salmon with asparagus and brown rice",
+            snacks: "Greek yogurt with walnuts"
+          };
+        }
+      } 
+      else if (goal === "Gain Muscle") {
+        workout = "Strength Training:\n- Warmup: 5 min dynamic stretches\n- Compound lifts (4 sets x 6-8 reps):\n  • Squats\n  • Bench press\n  • Deadlifts\n  • Pull-ups\n- Accessory work (3 sets x 10-12 reps):\n  • Bicep curls\n  • Tricep dips\n  • Shoulder press";
+        
+        if (preference === "Vegetarian") {
+          meals = {
+            breakfast: "Protein smoothie with banana, peanut butter, protein powder, and milk",
+            lunch: "Lentil curry with brown rice and side of Greek yogurt",
+            dinner: "Paneer tikka with quinoa and sautéed vegetables",
+            snacks: "Cottage cheese with pineapple"
+          };
+        } else if (preference === "Vegan") {
+          meals = {
+            breakfast: "Tofu scramble with whole grain toast and avocado",
+            lunch: "Chickpea and sweet potato Buddha bowl",
+            dinner: "Tempeh stir-fry with brown rice noodles",
+            snacks: "Protein shake with almond milk"
+          };
+        } else {
+          meals = {
+            breakfast: "6 egg whites + 2 whole eggs with oatmeal",
+            lunch: "Grilled chicken breast with rice and steamed veggies",
+            dinner: "Lean beef with roasted potatoes and greens",
+            snacks: "Cottage cheese with almonds"
+          };
+        }
+      } 
+      else { // Maintain Weight
+        workout = "Balanced Workout:\n- 20 min moderate cardio (cycling/swimming)\n- Full body circuit (3 rounds):\n  • 12 bodyweight squats\n  • 10 push-ups\n  • 12 walking lunges\n  • 10 bent-over rows\n  • 30s plank\n- Cool down with stretching";
+        
+        meals = {
+          breakfast: "Whole grain toast with avocado and poached eggs",
+          lunch: "Quinoa salad with mixed vegetables and feta cheese",
+          dinner: "Grilled fish with roasted vegetables and couscous",
+          snacks: "Handful of mixed nuts and a pear"
+        };
+      }
+      
+      // Set suggestions
+      document.getElementById('breakfast').value = meals.breakfast;
+      document.getElementById('lunch').value = meals.lunch;
+      document.getElementById('dinner').value = meals.dinner;
+      document.getElementById('snacks').value = meals.snacks;
+      document.getElementById('workout').value = workout;
+      
+      // Estimate meal calories (very rough estimates)
+      document.getElementById('breakfast-calories').textContent = Math.round(parseInt(document.getElementById('calories').textContent) * 0.25 || '~350');
+      document.getElementById('lunch-calories').textContent = Math.round(parseInt(document.getElementById('calories').textContent) * 0.35 || '~500');
+      document.getElementById('dinner-calories').textContent = Math.round(parseInt(document.getElementById('calories').textContent) * 0.3 || '~450');
+      document.getElementById('snacks-calories').textContent = Math.round(parseInt(document.getElementById('calories').textContent) * 0.1 || '~200');
+      
+      saveData();
+    }
+    
+    // Suggest Individual Meal
+    function suggestMeal(mealType) {
+      const goal = document.getElementById('goal').value;
+      const preference = document.getElementById('preference').value;
+      
+      let suggestion = "";
+      
+      if (mealType === "breakfast") {
+        if (goal === "Lose Weight") {
+          suggestion = preference.includes("Vegetarian") 
+            ? "Greek yogurt with berries and chia seeds" 
+            : "Scrambled eggs with spinach and whole grain toast";
+        } else if (goal === "Gain Muscle") {
+          suggestion = preference.includes("Vegetarian") 
+            ? "Protein smoothie with banana, peanut butter, and plant-based protein" 
+            : "Oatmeal with protein powder and almonds";
+        } else {
+          suggestion = "Avocado toast with poached eggs and side of fruit";
+        }
+      } 
+      else if (mealType === "lunch") {
+        if (goal === "Lose Weight") {
+          suggestion = preference.includes("Vegetarian") 
+            ? "Large salad with mixed greens, chickpeas, and olive oil dressing" 
+            : "Grilled chicken with roasted vegetables";
+        } else if (goal === "Gain Muscle") {
+          suggestion = preference.includes("Vegetarian") 
+            ? "Lentil soup with whole grain bread" 
+            : "Grilled salmon with quinoa and steamed broccoli";
+        } else {
+          suggestion = "Quinoa bowl with roasted vegetables and feta cheese";
+        }
+      } 
+      else if (mealType === "dinner") {
+        if (goal === "Lose Weight") {
+          suggestion = preference.includes("Vegetarian") 
+            ? "Vegetable stir-fry with tofu" 
+            : "Baked white fish with asparagus";
+        } else if (goal === "Gain Muscle") {
+          suggestion = preference.includes("Vegetarian") 
+            ? "Chickpea curry with brown rice" 
+            : "Grilled steak with sweet potato and greens";
+        } else {
+          suggestion = "Grilled chicken with roasted vegetables and couscous";
+        }
+      } 
+      else if (mealType === "snacks") {
+        if (goal === "Lose Weight") {
+          suggestion = "Handful of almonds and an apple";
+        } else if (goal === "Gain Muscle") {
+          suggestion = "Cottage cheese with walnuts";
+        } else {
+          suggestion = "Greek yogurt with honey and granola";
+        }
+      }
+      
+      document.getElementById(mealType).value = suggestion;
+      saveData();
+    }
+    
+    // Suggest Workout
+    function suggestWorkout() {
+      const focus = document.getElementById('workout-focus').value;
+      const goal = document.getElementById('goal').value;
+      
+      let workout = "";
+      
+      if (focus === "Full Body") {
+        if (goal === "Lose Weight") {
+          workout = "Full Body Circuit (3 rounds):\n- 20 jumping jacks\n- 15 bodyweight squats\n- 10 push-ups\n- 12 lunges (each leg)\n- 30s plank\n- 20 mountain climbers\n\nFinish with 15 min moderate cardio";
+        } else if (goal === "Gain Muscle") {
+          workout = "Full Body Strength (4 sets each):\n- Squats: 8-10 reps\n- Bench Press: 8-10 reps\n- Bent-over Rows: 8-10 reps\n- Shoulder Press: 8-10 reps\n- Deadlifts: 6-8 reps\n\nRest 60-90s between sets";
+        } else {
+          workout = "Balanced Full Body:\n- Warmup: 5 min dynamic stretches\n- 3 rounds:\n  • 12 goblet squats\n  • 10 dumbbell rows\n  • 12 step-ups\n  • 10 push-ups\n  • 30s side plank (each side)\n\nFinish with 10 min cardio";
+        }
+      } 
+      else if (focus === "Upper Body") {
+        workout = "Upper Body Focus:\n- Warmup: Arm circles, band pull-aparts\n- 4 sets each:\n  • Pull-ups: 6-8 reps\n  • Push-ups: 10-12 reps\n  • Dumbbell Shoulder Press: 8-10 reps\n  • Bent-over Rows: 8-10 reps\n  • Bicep Curls: 10-12 reps\n  • Tricep Dips: 10-12 reps";
+      } 
+      else if (focus === "Lower Body") {
+        workout = "Lower Body Focus:\n- Warmup: Bodyweight squats, lunges\n- 4 sets each:\n  • Squats: 8-10 reps\n  • Deadlifts: 6-8 reps\n  • Lunges: 10 reps/leg\n  • Calf Raises: 15 reps\n  • Leg Press: 10-12 reps\n\nFinish with 5 min stretching";
+      } 
+      else if (focus === "Cardio") {
+        workout = "Cardio Session:\n1. 5 min warmup (walking/jogging)\n2. Interval Training (repeat 5x):\n   - 1 min high intensity (sprinting/jumping)\n   - 2 min recovery (walking)\n3. 20 min steady-state cardio\n4. 5 min cooldown + stretching";
+      } 
+      else { // Rest Day
+        workout = "Active Recovery:\n- Light yoga/stretching (20-30 min)\n- Foam rolling\n- Focus on mobility exercises\n- Hydrate well and prioritize sleep";
+      }
+      
+      document.getElementById('workout').value = workout;
+      saveData();
+    }
+    
+    // Log Progress
+    function logProgress() {
+      const currentWeight = parseFloat(document.getElementById('current-weight').value);
+      const targetWeight = parseFloat(document.getElementById('target-weight').value);
+      const date = new Date().toLocaleDateString();
+      
+      if (!currentWeight) {
+        alert("Please enter your current weight");
+        return;
+      }
+      
+      // Add to progress data
+      progressData.push({
+        date,
+        weight: currentWeight
+      });
+      
+      // Update chart
+      updateProgressChart();
+      
+      // Clear input
+      document.getElementById('current-weight').value = '';
+      
+      saveData();
+    }
+    
+    // Update Progress Chart
+    function updateProgressChart() {
+      const labels = progressData.map(item => item.date);
+      const data = progressData.map(item => item.weight);
+      const targetWeight = parseFloat(document.getElementById('target-weight').value);
+      
+      progressChart.data.labels = labels;
+      progressChart.data.datasets[0].data = data;
+      
+      // Add target weight line if set
+      if (targetWeight && !isNaN(targetWeight)) {
+        if (progressChart.data.datasets.length === 1) {
+          progressChart.data.datasets.push({
+            label: 'Target Weight',
+            data: Array(labels.length).fill(targetWeight),
+            borderColor: '#ef4444', // red-500
+            borderWidth: 1,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false
+          });
+        } else {
+          progressChart.data.datasets[1].data = Array(labels.length).fill(targetWeight);
+        }
+      }
+      
+      progressChart.update();
+    }
+    
+    // Save Data to Local Storage
+    function saveData() {
+      const data = {
+        profile: {
+          name: document.getElementById('name').value,
+          age: document.getElementById('age').value,
+          gender: document.getElementById('gender').value,
+          height: document.getElementById('height').value,
+          weight: document.getElementById('weight').value,
+          activity: document.getElementById('activity').value,
+          goal: document.getElementById('goal').value,
+          preference: document.getElementById('preference').value
+        },
+        stats: {
+          bmi: document.getElementById('bmi').textContent,
+          water: document.getElementById('water').textContent,
+          calories: document.getElementById('calories').textContent,
+          protein: document.getElementById('protein').textContent,
+          carbs: document.getElementById('carbs').textContent,
+          fats: document.getElementById('fats').textContent
+        },
+        meals: {
+          breakfast: document.getElementById('breakfast').value,
+          lunch: document.getElementById('lunch').value,
+          dinner: document.getElementById('dinner').value,
+          snacks: document.getElementById('snacks').value,
+          breakfastCalories: document.getElementById('breakfast-calories').textContent,
+          lunchCalories: document.getElementById('lunch-calories').textContent,
+          dinnerCalories: document.getElementById('dinner-calories').textContent,
+          snacksCalories: document.getElementById('snacks-calories').textContent
+        },
+        workout: {
+          focus: document.getElementById('workout-focus').value,
+          routine: document.getElementById('workout').value
+        },
+        progress: {
+          currentWeight: document.getElementById('current-weight').value,
+          targetWeight: document.getElementById('target-weight').value,
+          progressData
+        }
+      };
+      
+      localStorage.setItem('healthPlannerData', JSON.stringify(data));
+    }
+    
+    // Load Data from Local Storage
+    function loadData() {
+      const data = JSON.parse(localStorage.getItem('healthPlannerData'));
+      if (!data) return;
+      
+      // Load profile
+      if (data.profile) {
+        document.getElementById('name').value = data.profile.name || '';
+        document.getElementById('age').value = data.profile.age || '';
+        document.getElementById('gender').value = data.profile.gender || '';
+        document.getElementById('height').value = data.profile.height || '';
+        document.getElementById('weight').value = data.profile.weight || '';
+        document.getElementById('activity').value = data.profile.activity || '1.55';
+        document.getElementById('goal').value = data.profile.goal || 'Maintain';
+        document.getElementById('preference').value = data.profile.preference || 'Balanced';
+      }
+      
+      // Load stats
+      if (data.stats) {
+        document.getElementById('bmi').textContent = data.stats.bmi || '--';
+        document.getElementById('water').textContent = data.stats.water || '0%';
+        document.getElementById('calories').textContent = data.stats.calories || '--';
+        document.getElementById('protein').textContent = data.stats.protein || '-- g';
+        document.getElementById('carbs').textContent = data.stats.carbs || '-- g';
+        document.getElementById('fats').textContent = data.stats.fats || '-- g';
+        
+        // Update BMI ring
+        const bmiValue = parseFloat(data.stats.bmi) || 0;
+        document.documentElement.style.setProperty('--bmi-percent', Math.min((bmiValue / 40) * 100, 100));
+        
+        // Update water ring
+        const waterValue = parseInt(data.stats.water) || 0;
+        document.documentElement.style.setProperty('--water-percent', waterValue);
+      }
+      
+      // Load meals
+      if (data.meals) {
+        document.getElementById('breakfast').value = data.meals.breakfast || '';
+        document.getElementById('lunch').value = data.meals.lunch || '';
+        document.getElementById('dinner').value = data.meals.dinner || '';
+        document.getElementById('snacks').value = data.meals.snacks || '';
+        document.getElementById('breakfast-calories').textContent = data.meals.breakfastCalories || '0';
+        document.getElementById('lunch-calories').textContent = data.meals.lunchCalories || '0';
+        document.getElementById('dinner-calories').textContent = data.meals.dinnerCalories || '0';
+        document.getElementById('snacks-calories').textContent = data.meals.snacksCalories || '0';
+      }
+      
+      // Load workout
+      if (data.workout) {
+        document.getElementById('workout-focus').value = data.workout.focus || 'Full Body';
+        document.getElementById('workout').value = data.workout.routine || '';
+      }
+      
+      // Load progress
+      if (data.progress) {
+        document.getElementById('current-weight').value = data.progress.currentWeight || '';
+        document.getElementById('target-weight').value = data.progress.targetWeight || '';
+        progressData = data.progress.progressData || [];
+        updateProgressChart();
+      }
+      
+      // Recalculate health stats if needed
+      if (document.getElementById('height').value && document.getElementById('weight').value) {
+        calculateHealthStats();
+      }
+    }
+    
+    // Reset Data
+    function resetData() {
+      if (confirm("Are you sure you want to reset all data?")) {
+        localStorage.removeItem('healthPlannerData');
+        location.reload();
+      }
+    }
+    
+    // Download as PDF
+   function downloadPDF() {
+  const element = document.createElement('div');
+  element.style.width = '800px';
+  element.style.padding = '20px';
+  element.style.fontFamily = "'Poppins', sans-serif";
+
+  const formatContent = (content) => {
+    return content ? content.replace(/\n/g, '<br>') : 'Not specified';
+  };
+
+  // Get BMI value and determine status
+  const bmiValue = parseFloat(document.getElementById('bmi')?.textContent) || 0;
+  let bmiStatus = '--';
+  
+  if (bmiValue > 0) {
+    if (bmiValue < 18.5) bmiStatus = 'Underweight';
+    else if (bmiValue < 24.9) bmiStatus = 'Normal';
+    else if (bmiValue < 29.9) bmiStatus = 'Overweight';
+    else bmiStatus = 'Obese';
+  }
+
+  element.innerHTML = `
+    <h1 style="color: #047857; text-align: center;">Smart Health Planner</h1>
+    <p style="text-align: center; color: #666;">${new Date().toLocaleDateString()}</p>
+
+    <hr style="margin: 10px 0">
+
+    <h2>User Profile</h2>
+    <p><strong>Name:</strong> ${document.getElementById('name')?.value || '--'}</p>
+    <p><strong>Age:</strong> ${document.getElementById('age')?.value || '--'}</p>
+    <p><strong>Gender:</strong> ${document.getElementById('gender')?.value || '--'}</p>
+    <p><strong>Height:</strong> ${document.getElementById('height')?.value || '--'} cm</p>
+    <p><strong>Weight:</strong> ${document.getElementById('weight')?.value || '--'} kg</p>
+    <p><strong>BMI:</strong> ${document.getElementById('bmi')?.textContent || '--'} <span style="color: ${
+      bmiStatus === 'Normal' ? '#10B981' : 
+      bmiStatus === 'Underweight' ? '#3B82F6' : 
+      bmiStatus === 'Overweight' ? '#F59E0B' : '#EF4444'
+    }">(${bmiStatus})</span></p>
+
+    <hr style="margin: 10px 0">
+
+    <h2>Nutrition Goals</h2>
+    <p><strong>Calories:</strong> ${document.getElementById('calories')?.textContent || '--'}</p>
+    <p><strong>Protein:</strong> ${document.getElementById('protein')?.textContent || '--'}</p>
+    <p><strong>Carbs:</strong> ${document.getElementById('carbs')?.textContent || '--'}</p>
+    <p><strong>Fats:</strong> ${document.getElementById('fats')?.textContent || '--'}</p>
+    <p><strong>Water:</strong> ${document.getElementById('water')?.textContent || '--'}</p>
+
+    <hr style="margin: 10px 0">
+
+    <h2>Meal Plan</h2>
+    <p><strong>Breakfast (${document.getElementById('breakfast-calories')?.textContent || '0'} kcal):</strong><br>
+    ${formatContent(document.getElementById('breakfast')?.value)}</p>
+
+    <p><strong>Lunch (${document.getElementById('lunch-calories')?.textContent || '0'} kcal):</strong><br>
+    ${formatContent(document.getElementById('lunch')?.value)}</p>
+
+    <p><strong>Dinner (${document.getElementById('dinner-calories')?.textContent || '0'} kcal):</strong><br>
+    ${formatContent(document.getElementById('dinner')?.value)}</p>
+
+    <p><strong>Snacks (${document.getElementById('snacks-calories')?.textContent || '0'} kcal):</strong><br>
+    ${formatContent(document.getElementById('snacks')?.value)}</p>
+
+    <hr style="margin: 10px 0">
+
+    <h2>Workout Plan</h2>
+    <p><strong>Focus:</strong> ${document.getElementById('workout-focus')?.value || '--'}</p>
+    <p style="white-space: pre-wrap; background: #f8f8f8; padding: 10px; border-radius: 5px;">
+    ${formatContent(document.getElementById('workout')?.value)}
+    </p>
+
+    <p style="text-align: center; margin-top: 20px; font-size: 12px; color: #777;">Generated on ${new Date().toLocaleString()}</p>
+  `;
+
+  document.body.appendChild(element);
+
+  const opt = {
+    margin: 0.5,
+    filename: 'Health_Plan.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { 
+      scale: 2, 
+      scrollY: 0,
+      logging: true,
+      useCORS: true,
+      allowTaint: true
+    },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  // Add small delay to ensure DOM is ready
+  setTimeout(() => {
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .then(() => {
+        document.body.removeChild(element);
+      })
+      .catch(err => {
+        console.error('PDF generation error:', err);
+        document.body.removeChild(element);
+      });
+  }, 200);
+}
+  </script>
+</body>
+</html>
