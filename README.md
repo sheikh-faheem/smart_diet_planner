@@ -76,10 +76,6 @@ The application can be easily customized by:
 4. Mobile app version
 5. Social sharing features
 
-## License
 
-This project is open-source and available under the MIT License.
-
----
 
 For any questions or contributions, please open an issue or submit a pull request.
