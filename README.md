@@ -1,4 +1,3 @@
-<img width="1918" height="717" alt="image" src="https://github.com/user-attachments/assets/4db2030c-4c02-406c-8ecb-9315d0ccbf49" /># Smart Health Planner - Diet & Workout Companion
 
 ## Overview
 
